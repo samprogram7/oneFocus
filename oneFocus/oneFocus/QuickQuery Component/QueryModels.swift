@@ -20,7 +20,7 @@ struct SearchItem: Codable, Identifiable {
 }
 
 // View Model
-class SearchViewModel: ObservableObject {
+class QueryModels: ObservableObject {
     @Published var results: [SearchItem] = []
     @Published var isLoading = false
     @Published var errorMessage = ""

@@ -9,7 +9,7 @@ import SwiftUI
 
 
 struct SearchView: View {
-    @StateObject private var viewModel = SearchViewModel()
+    @StateObject private var viewModel = QueryModels()
     @State private var searchQuery = ""
     @State private var currentModel: String = "Web"
     @Namespace private var namespace
