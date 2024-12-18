@@ -13,6 +13,8 @@ struct MainView: View {
     @State private var isFlowActive = false
     @State private var isSearchActive = false
     @State private var isHovered = false
+    @State private var isContextSwitcherActive = false
+    
     
     var body: some View {
         NavigationStack {
@@ -33,7 +35,7 @@ struct MainView: View {
                     // Flow button
                     NavigationLink(destination: Flow(), isActive: $isFlowActive) {
                         VStack {
-                            Image(systemName: "timer")
+                            Image(systemName: "dial.high")
                                 .font(.system(size: 30))
                                 .foregroundColor(.white)
                             Text("Flow")
@@ -44,8 +46,8 @@ struct MainView: View {
                         .padding()
                         .background(
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.blue)
-                                .shadow(color: .blue.opacity(0.5), radius: isFlowActive ? 15 : 5, x: 0, y: isFlowActive ? 10 : 5)
+                                .fill(Color.brown)
+                                .shadow(color: .brown.opacity(0.5), radius: isFlowActive ? 15 : 5, x: 0, y: isFlowActive ? 10 : 5)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 12)
                                         .stroke(Color.white.opacity(0.3), lineWidth: 1)
@@ -74,8 +76,8 @@ struct MainView: View {
                         .padding()
                         .background(
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.green)
-                                .shadow(color: .green.opacity(0.5), radius: isSearchActive ? 15 : 5, x: 0, y: isSearchActive ? 10 : 5)
+                                .fill(Color.mint)
+                                .shadow(color: .mint.opacity(0.5), radius: isSearchActive ? 15 : 5, x: 0, y: isSearchActive ? 10 : 5)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 12)
                                         .stroke(Color.white.opacity(0.3), lineWidth: 1)
@@ -89,6 +91,36 @@ struct MainView: View {
                         .animation(.spring(response: 0.6, dampingFraction: 0.6, blendDuration: 0.6), value: isSearchActive)
                     }
                     .buttonStyle(PlainButtonStyle())
+                    
+                    NavigationLink(destination: ContextSwitcherView(), isActive: $isContextSwitcherActive){
+                        VStack {
+                            Image(systemName: "distribute.vertical")
+                                .font(.system(size: 30))
+                                .foregroundColor(.white)
+                            Text("Context Switcher")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.indigo)
+                                .shadow(color: .indigo.opacity(0.5), radius: isContextSwitcherActive ? 15 : 5, x: 0, y: isContextSwitcherActive ? 10 : 5)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                )
+                        )
+                        .scaleEffect(isContextSwitcherActive ? 0.9 : 1)
+                        .rotation3DEffect(
+                            .degrees(isContextSwitcherActive ? 360 : 0),
+                            axis: (x: 1, y: 0, z: 0)
+                        )
+                        .animation(.spring(response: 0.6, dampingFraction: 0.6, blendDuration: 0.6), value: isContextSwitcherActive)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    
                 }
                 .padding(.horizontal)
                 
