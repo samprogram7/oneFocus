@@ -115,6 +115,7 @@ struct ContextSwitcherView: View {
                     .fill(selectedContext == context ? Color.indigo : Color.gray.opacity(0.1))
             )
             .foregroundColor(selectedContext == context ? .white : .primary)
+            
         }
         .buttonStyle(PlainButtonStyle())
     }

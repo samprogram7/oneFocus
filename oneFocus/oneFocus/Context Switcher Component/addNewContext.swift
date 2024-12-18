@@ -8,14 +8,17 @@
 import Foundation
 import SwiftUI
 
-struct ContextCard {
-    let title: String
-    let workType: String
-    let workDepth: String
-    let notes: String
+struct contextCard {
+    var title: String
+    var workType: String
+    var workDepth: String
+    var notes: String
     
 }
 
 func makeContext(title: String, workType: String, workDepth: String, notes: String){
+    contextCard(title: title, workType: workType, workDepth: workDepth, notes: notes)
     
 }
+
+
