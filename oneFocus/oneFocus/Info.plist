@@ -34,5 +34,9 @@
     </dict>
     <key>com.apple.security.network.client</key>
     <true/>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>This app needs to control other applications to save and restore your work context.</string>
+    <key>com.apple.security.automation.apple-events</key>
+    <true/>
 </dict>
 </plist>

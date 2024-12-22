@@ -8,10 +8,20 @@
 import SwiftUI
 
 struct ContextSwitcherView: View {
+    @StateObject private var contextManager = ContextManager()
     @State private var isAddingContext = false
     @State private var searchText = ""
-    @State private var selectedContext: String?
     @State private var isHovered = false
+    
+    var filteredContexts: [ContextCard] {
+        if searchText.isEmpty {
+            return contextManager.contexts
+        }
+        return contextManager.contexts.filter { context in
+            context.title.localizedCaseInsensitiveContains(searchText) ||
+            context.notes.localizedCaseInsensitiveContains(searchText)
+        }
+    }
     
     var body: some View {
         VStack(spacing: 15) {
@@ -43,14 +53,8 @@ struct ContextSwitcherView: View {
             
             // Context List
             ScrollView {
-                VStack(spacing: 10) {
-                    // Active Context Card (if any)
-                    if let selectedContext = selectedContext {
-                        activeContextCard(context: selectedContext)
-                    }
-                    
-                    // Other Contexts
-                    ForEach(["Bug Fix", "Feature Dev", "Documentation"], id: \.self) { context in
+                LazyVStack(spacing: 12) {
+                    ForEach(contextManager.contexts) { context in
                         contextCard(context: context)
                     }
                 }
@@ -89,65 +93,56 @@ struct ContextSwitcherView: View {
         .frame(width: AppDimensions.width, height: AppDimensions.height)
         .background(Color(NSColor.textBackgroundColor))
         .sheet(isPresented: $isAddingContext) {
-            NewContextSheet(isPresented: $isAddingContext)
+            NewContextCard(
+                isPresented: $isAddingContext,
+                onCreateContext: { newContext in
+                    contextManager.createContext(title: newContext.title, workType: newContext.workType, workDepth: newContext.workDepth, notes: newContext.notes)
+                }
+            )
         }
     }
     
-    private func contextCard(context: String) -> some View {
-        Button(action: { selectedContext = context }) {
+    private func contextCard(context: ContextCard) -> some View {
+        Button(action: { toggleContextActive(context) }) {
             HStack {
-                VStack(alignment: .leading) {
-                    Text(context)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(context.title)
                         .font(.headline)
-                    Text("2 apps · 3 tabs")
-                        .font(.caption)
-                        .foregroundColor(.gray)
+                    HStack {
+                        Text(context.workType)
+                            .font(.caption)
+                        Text("•")
+                        Text(context.workDepth)
+                            .font(.caption)
+                    }
+                    .foregroundColor(.gray)
+                    
+                    if !context.notes.isEmpty {
+                        Text(context.notes)
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                            .lineLimit(2)
+                    }
                 }
                 Spacer()
-                Text("1h 30m")
-                    .font(.caption)
-                    .foregroundColor(.gray)
+                
+                if context.isActive {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.white)
+                }
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(selectedContext == context ? Color.indigo : Color.gray.opacity(0.1))
+                    .fill(context.isActive ? Color.indigo : Color.gray.opacity(0.1))
             )
-            .foregroundColor(selectedContext == context ? .white : .primary)
-            
+            .foregroundColor(context.isActive ? .white : .primary)
         }
         .buttonStyle(PlainButtonStyle())
     }
     
-    private func activeContextCard(context: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("Active Context")
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
-                Spacer()
-                Image(systemName: "checkmark.circle.fill")
-            }
-            Text(context)
-                .font(.headline)
-            HStack {
-                Text("2 apps · 3 tabs")
-                Spacer()
-                Text("1h 30m")
-            }
-            .font(.caption)
-            .foregroundColor(.white.opacity(0.7))
-        }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.indigo)
-        )
-        .foregroundColor(.white)
+    private func toggleContextActive(_ context: ContextCard) {
+        contextManager.switchToContext(context)
     }
-    
 }
-
-
