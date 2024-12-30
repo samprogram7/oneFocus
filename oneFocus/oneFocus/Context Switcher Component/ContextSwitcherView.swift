@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct ContextSwitcherView: View {
-    @State private var isAddingContext = false
+    @State var shouldPresentForm: Bool = false
     @State private var searchText = ""
-    @State private var selectedContext: String?
     @State private var isHovered = false
-    
+    @State private var contexts: [ContextCardModel] = []
+    private let storageManager = StorageManager()
     var body: some View {
         VStack(spacing: 15) {
             // Header with Title and Search
@@ -21,132 +21,68 @@ struct ContextSwitcherView: View {
                     .font(.title2)
                     .fontDesign(.rounded)
                     .bold()
+                    .padding()
                 
-                // Search Bar
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
-                    TextField("Search contexts...", text: $searchText)
-                        .textFieldStyle(.plain)
-                }
-                .padding(8)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.gray.opacity(0.1))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                        )
-                )
-            }
-            .padding(.top)
-            
-            // Context List
-            ScrollView {
-                VStack(spacing: 10) {
-                    // Active Context Card (if any)
-                    if let selectedContext = selectedContext {
-                        activeContextCard(context: selectedContext)
+                // Add New Context Button
+                Button(action: {
+                    shouldPresentForm = true
+                }) {
+                    HStack {
+                        Image(systemName: "plus.circle.fill")
+                        Text("New Context")
                     }
-                    
-                    // Other Contexts
-                    ForEach(["Bug Fix", "Feature Dev", "Documentation"], id: \.self) { context in
-                        contextCard(context: context)
-                    }
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.indigo)
+                            .shadow(color: .indigo.opacity(0.3), radius: isHovered ? 10 : 5)
+                    )
                 }
-            }
-            
-            // Add New Context Button
-            Button(action: { isAddingContext = true }) {
-                HStack {
-                    Image(systemName: "plus.circle.fill")
-                    Text("New Context")
-                }
-                .foregroundColor(.white)
                 .padding()
-                .frame(maxWidth: .infinity)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.indigo)
-                        .shadow(color: .indigo.opacity(0.3), radius: isHovered ? 10 : 5)
-                )
-            }
-            .buttonStyle(PlainButtonStyle())
-            .scaleEffect(isHovered ? 1.02 : 1.0)
-            .onHover { hovering in
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    isHovered = hovering
+                .buttonStyle(PlainButtonStyle())
+                .scaleEffect(isHovered ? 1.02 : 1.0)
+                .onHover { hovering in
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isHovered = hovering
+                    }
                 }
-            }
-            
-            NavigationLink(destination: MainView()) {
-                Text("Back")
-                    .foregroundColor(.blue)
-            }
-            .padding(.bottom)
-        }
-        .padding(.horizontal)
-        .frame(width: AppDimensions.width, height: AppDimensions.height)
-        .background(Color(NSColor.textBackgroundColor))
-        .sheet(isPresented: $isAddingContext) {
-            NewContextSheet(isPresented: $isAddingContext)
-        }
-    }
-    
-    private func contextCard(context: String) -> some View {
-        Button(action: { selectedContext = context }) {
-            HStack {
-                VStack(alignment: .leading) {
-                    Text(context)
-                        .font(.headline)
-                    Text("2 apps · 3 tabs")
-                        .font(.caption)
-                        .foregroundColor(.gray)
+                .sheet(isPresented: $shouldPresentForm){
+                    CardContextForm(contexts: $contexts)
                 }
-                Spacer()
-                Text("1h 30m")
-                    .font(.caption)
-                    .foregroundColor(.gray)
+                //Rendering The Context Cards
+                
+                ScrollView {
+                    LazyVStack(spacing: 12) {
+                        ForEach(contexts) { context in
+                            ContextCard(
+                                context: context,
+                                onDelete: {
+                                    // Remove the context from the array
+                                        if let index = contexts.firstIndex(where: { $0.id == context.id }) {
+                                            contexts.remove(at: index)
+                                        }
+                                    }
+                            )
+                            
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+                
+                NavigationLink(destination: MainView()) {
+                    Text("Back")
+                        .foregroundColor(.blue)
+                }
+                .padding()
             }
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(selectedContext == context ? Color.indigo : Color.gray.opacity(0.1))
-            )
-            .foregroundColor(selectedContext == context ? .white : .primary)
+            .padding(.horizontal)
+            .frame(width: AppDimensions.width, height: AppDimensions.height)
+            .background(Color(NSColor.textBackgroundColor))
         }
-        .buttonStyle(PlainButtonStyle())
-    }
-    
-    private func activeContextCard(context: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("Active Context")
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
-                Spacer()
-                Image(systemName: "checkmark.circle.fill")
-            }
-            Text(context)
-                .font(.headline)
-            HStack {
-                Text("2 apps · 3 tabs")
-                Spacer()
-                Text("1h 30m")
-            }
-            .font(.caption)
-            .foregroundColor(.white.opacity(0.7))
+        .onAppear{
+            contexts = storageManager.loadContexts()
         }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.indigo)
-        )
-        .foregroundColor(.white)
     }
-    
 }
-
-
