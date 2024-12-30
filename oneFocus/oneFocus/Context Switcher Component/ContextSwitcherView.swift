@@ -12,7 +12,7 @@ struct ContextSwitcherView: View {
     @State private var searchText = ""
     @State private var isHovered = false
     @State private var contexts: [ContextCardModel] = []
-    
+    private let storageManager = StorageManager()
     var body: some View {
         VStack(spacing: 15) {
             // Header with Title and Search
@@ -51,8 +51,6 @@ struct ContextSwitcherView: View {
                 .sheet(isPresented: $shouldPresentForm){
                     CardContextForm(contexts: $contexts)
                 }
-                
-                
                 //Rendering The Context Cards
                 
                 ScrollView {
@@ -82,6 +80,9 @@ struct ContextSwitcherView: View {
             .padding(.horizontal)
             .frame(width: AppDimensions.width, height: AppDimensions.height)
             .background(Color(NSColor.textBackgroundColor))
+        }
+        .onAppear{
+            contexts = storageManager.loadContexts()
         }
     }
 }

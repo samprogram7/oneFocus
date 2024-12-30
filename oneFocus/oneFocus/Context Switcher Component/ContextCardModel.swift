@@ -14,7 +14,7 @@ struct ContextCardModel: Codable, Identifiable {
     var workType: WorkType
     var note: String
     var priority: WorkPriority
-    var systemState: SystemState?
+    var systemState: SystemState
 }
 
 enum WorkDepth: String, Codable, CaseIterable {
@@ -26,7 +26,7 @@ enum WorkDepth: String, Codable, CaseIterable {
 enum WorkPriority: String, Codable, CaseIterable {
     case high
     case medium
-    case shallow
+    case low
 }
 
 enum WorkType: String, Codable, CaseIterable {
